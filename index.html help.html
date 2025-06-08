@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Help | MedBook Hospital System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        .glass {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(8px);
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s forwards;
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+        /* --- Multi-language Switcher for Help --- */
+        #helpLang {
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #2563eb;
+            font-size: 1rem;
+            color: #2563eb;
+            background: #fff;
+            font-weight: 600;
+            outline: none;
+            transition: border 0.18s;
+        }
+        #helpLang:focus {
+            border-color: #38bdf8;
+        }
+
+        /* --- Recent Pages --- */
+        #recentPages {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 100;
+            background: #fff7;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.97rem;
+            color: #2563eb;
+            box-shadow: 0 2px 8px #2563eb22;
+        }
+        #recentPages a {
+            color: #2563eb;
+            text-decoration: underline;
+            margin-right: 8px;
+            transition: color 0.18s;
+        }
+        #recentPages a:hover {
+            color: #1e40af;
+        }
+
+        /* --- Floating Help Button --- */
+        .help-fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 50;
+            background: linear-gradient(135deg, #2563eb 60%, #38bdf8 100%);
+            color: #fff;
+            border-radius: 9999px;
+            box-shadow: 0 8px 32px rgba(37,99,235,0.25);
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .help-fab:hover {
+            transform: scale(1.1) rotate(8deg);
+            box-shadow: 0 12px 40px rgba(37,99,235,0.35);
+        }
+
+        /* --- Live Chat Modal --- */
+        #chatModal {
+            display: none;
+            position: fixed;
+            bottom: 90px;
+            right: 30px;
+            z-index: 1000;
+            width: 340px;
+            max-width: 95vw;
+        }
+        #chatModal .bg-white {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px #2563eb22;
+            border: 1px solid #bfdbfe;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #chatModal .bg-blue-700 {
+            background: #2563eb;
+        }
+        #chatModal .text-white {
+            color: #fff;
+        }
+        #chatModal .text-blue-700 {
+            color: #2563eb;
+        }
+        #chatModal .hover\:text-blue-200:hover {
+            color: #bfdbfe;
+        }
+        #chatMessages {
+            height: 220px;
+            overflow-y: auto;
+            padding: 14px;
+            background: #f8fafc;
+            font-size: 1rem;
+        }
+        #chatForm {
+            display: flex;
+            border-top: 1px solid #bfdbfe;
+            background: #f1f5f9;
+        }
+        #chatInput {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 1rem;
+        }
+        #chatForm button[type="submit"] {
+            padding: 0 16px;
+            color: #2563eb;
+            font-weight: bold;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: color 0.18s;
+        }
+        #chatForm button[type="submit"]:hover {
+            color: #1e40af;
+        }
+        #chatForm label[for="chatFile"] {
+            cursor: pointer;
+            margin-left: 8px;
+            color: #2563eb;
+            font-size: 1.3rem;
+            transition: color 0.18s;
+        }
+        #chatForm label[for="chatFile"]:hover {
+            color: #1e40af;
+        }
+
+        /* --- FAQ Suggestions in Chat --- */
+        #faqSuggestions {
+            display: none;
+            max-height: 90px;
+            overflow-y: auto;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 8px 0 0 0;
+            padding: 6px 12px;
+            font-size: 0.98rem;
+            color: #2563eb;
+        }
+        #faqSuggestions li {
+            cursor: pointer;
+            padding: 3px 0;
+            border-bottom: 1px solid #e0e7ef;
+            transition: background 0.15s;
+        }
+        #faqSuggestions li:last-child {
+            border-bottom: none;
+        }
+        #faqSuggestions li:hover {
+            background: #e0e7ef;
+        }
+
+        /* --- Rate Helpfulness --- */
+        #chatRating {
+            text-align: center;
+            padding: 10px 0;
+        }
+        #chatRating button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin: 0 4px;
+            transition: transform 0.15s;
+        }
+        #chatRating button:hover {
+            transform: scale(1.2);
+        }
+        #chatRating button:first-child { color: #2ecc40; }
+        #chatRating button:last-child { color: #FF6B6B; }
+
+        /* --- ARIA Live for Screen Readers --- */
+        /* No visible CSS needed, but you can hide it off-screen: */
+        #ariaLive {
+            position: absolute;
+            left: -9999px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        /* --- Back to Home Button --- */
+        [style*="right:24px"][style*="top:24px"] a {
+            background: #2563eb;
+            color: #fff;
+            padding: 10px 28px;
+            border-radius: 9999px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 2px 8px #2563eb22;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.18s;
+        }
+        [style*="right:24px"][style*="top:24px"] a:hover {
+            background: #1e40af;
+        }
+
+        /* --- Accessibility Tools (Font Size & Contrast) --- */
+        [style*="left:24px"][style*="top:24px"] button {
+            background: #2563eb;
+            color: #fff;
+            border-radius: 9999px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0;
+            transition: background 0.18s;
+        }
+        [style*="left:24px"][style*="top:24px"] button:hover {
+            background: #1e40af;
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 600px) {
+            #chatModal {
+                right: 5vw;
+                width: 95vw;
+                min-width: 0;
+            }
+            #recentPages {
+                left: 5vw;
+                right: 5vw;
+                width: auto;
+                font-size: 0.93rem;
+                padding: 8px 6px;
+            }
+            [style*="right:24px"][style*="top:24px"] a {
+                padding: 8px 16px;
+                font-size: 1rem;
+            }
+            [style*="left:24px"][style*="top:24px"] button {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 min-h-screen text-gray-800 font-sans">
+
+    <!-- Sticky Glassmorphic Header -->
+    <header class="glass sticky top-0 z-40 shadow-md py-4">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="https://cdn-icons-png.flaticon.com/512/2966/2966484.png" alt="MedBook Logo" class="w-10 h-10 rounded-full shadow">
+                <h1 class="text-2xl md:text-3xl font-extrabold text-blue-700 tracking-tight">Navigation Help</h1>
+            </div>
+            <nav class="mt-4 md:mt-0 flex flex-wrap gap-2">
+                <a href="index.hospital.html" class="text-blue-700 hover:underline px-2 py-1 rounded transition">Home</a>
+                <a href="index.patientrecords.html" class="text-blue-700 hover:underline px-2 py-1 rounded transition">Patient Records</a>
+                <a href="index.staffmanagment.html" class="text-blue-700 hover:underline px-2 py-1 rounded transition">Staff</a>
+                <a href="index.appointments.html" class="text-blue-700 hover:underline px-2 py-1 rounded transition">Appointments</a>
+                <a href="index.contacthospital.html" class="text-blue-700 hover:underline px-2 py-1 rounded transition">Contact</a>
+                <a href="index.html help.html" class="text-blue-700 underline font-semibold px-2 py-1 rounded transition bg-blue-100">Need Help</a>
+                <a href="index.html billing.html" class="text-blue-700 hover:underline px-2 py-1 rounded transition">Billing</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Search Bar -->
+    <section class="container mx-auto px-4 mt-10 fade-in" style="animation-delay:0.1s">
+        <div class="flex items-center bg-white rounded-xl shadow-lg p-5 ring-1 ring-blue-100 focus-within:ring-2 focus-within:ring-blue-400 transition">
+            <i class='bx bx-search text-2xl text-blue-600 mr-3'></i>
+            <input type="text" placeholder="Search for help topics, pages, or features..." class="w-full outline-none text-lg bg-transparent placeholder-blue-400" />
+        </div>
+    </section>
+
+    <!-- Quick Links Grid -->
+    <section class="container mx-auto px-4 mt-10 fade-in" style="animation-delay:0.2s">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <a href="index.hospital.html" class="flex flex-col items-center bg-white rounded-lg shadow hover:shadow-lg p-6 transition group">
+                <i class='bx bx-home text-3xl text-blue-600 group-hover:text-blue-800'></i>
+                <span class="mt-2 font-semibold text-blue-700">Home</span>
+            </a>
+            <a href="index.patientrecords.html" class="flex flex-col items-center bg-white rounded-lg shadow hover:shadow-lg p-6 transition group">
+                <i class='bx bx-folder text-3xl text-blue-600 group-hover:text-blue-800'></i>
+                <span class="mt-2 font-semibold text-blue-700">Patient Records</span>
+            </a>
+            <a href="index.staffmanagment.html" class="flex flex-col items-center bg-white rounded-lg shadow hover:shadow-lg p-6 transition group">
+                <i class='bx bx-user text-3xl text-blue-600 group-hover:text-blue-800'></i>
+                <span class="mt-2 font-semibold text-blue-700">Staff</span>
+            </a>
+            <a href="index.appointments.html" class="flex flex-col items-center bg-white rounded-lg shadow hover:shadow-lg p-6 transition group">
+                <i class='bx bx-calendar text-3xl text-blue-600 group-hover:text-blue-800'></i>
+                <span class="mt-2 font-semibold text-blue-700">Appointments</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Navigation Guide -->
+    <section class="container mx-auto px-4 mt-12 fade-in" style="animation-delay:0.3s">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-bold mb-6 text-blue-700 flex items-center gap-2"><i class='bx bx-map'></i> How to Navigate the Hospital System</h2>
+            <ol class="list-decimal ml-6 space-y-4 text-lg">
+                <li>
+                    <span class="font-semibold text-blue-700">Dashboard:</span> After login, you’ll see the dashboard with quick links to all main sections.
+                </li>
+                <li>
+                    <span class="font-semibold text-blue-700">Patient Records:</span> Access and manage patient information securely.
+                </li>
+                <li>
+                    <span class="font-semibold text-blue-700">Staff Management:</span> View, add, or edit staff details and roles.
+                </li>
+                <li>
+                    <span class="font-semibold text-blue-700">Appointments:</span> Book, view, or cancel appointments with doctors.
+                </li>
+                <li>
+                    <span class="font-semibold text-blue-700">Billing & Payments:</span> Review invoices and make payments online.
+                </li>
+                <li>
+                    <span class="font-semibold text-blue-700">Support:</span> Use the help section or contact support for assistance.
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="container mx-auto px-4 mt-12 fade-in" style="animation-delay:0.4s">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-bold mb-6 text-blue-700 flex items-center gap-2"><i class='bx bx-question-mark'></i> Frequently Asked Questions</h2>
+            <div class="space-y-4">
+                <details class="group">
+                    <summary class="cursor-pointer font-semibold text-blue-700 group-hover:underline">How do I reset my password?</summary>
+                    <p class="ml-4 mt-2 text-gray-700">Go to your profile, click "Change Password", and follow the instructions.</p>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-semibold text-blue-700 group-hover:underline">Where can I find patient records?</summary>
+                    <p class="ml-4 mt-2 text-gray-700">Click on "Patient Records" in the main navigation menu.</p>
+                </details>
+                <details class="group">
+                    <summary class="cursor-pointer font-semibold text-blue-700 group-hover:underline">How do I contact support?</summary>
+                    <p class="ml-4 mt-2 text-gray-700">Use the "Contact" page or the chat widget at the bottom right.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact & Help -->
+    <section class="container mx-auto px-4 mt-12 mb-20 fade-in" style="animation-delay:0.5s">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-400 rounded-2xl shadow-xl p-8 flex flex-col md:flex-row items-center justify-between text-white">
+            <div>
+                <h3 class="text-xl font-bold mb-2 flex items-center gap-2"><i class='bx bx-support'></i> Need More Help?</h3>
+                <p>Contact our support team or use the live chat for immediate assistance.</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-4">
+                <a href="mailto:support@medbook.com" class="bg-white text-blue-700 px-4 py-2 rounded-md font-semibold hover:bg-blue-100 transition flex items-center gap-2"><i class='bx bx-envelope'></i> Email Support</a>
+                <a href="tel:+1234567890" class="bg-white text-blue-700 px-4 py-2 rounded-md font-semibold hover:bg-blue-100 transition flex items-center gap-2"><i class='bx bx-phone'></i> Call Us</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Multi-language Switcher for Help -->
+    <div style="position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:200;">
+        <select id="helpLang" style="padding:4px 10px;border-radius:6px;border:1px solid #2563eb;">
+            <option value="en">English</option>
+            <option value="ku">Kurdish</option>
+            <option value="ar">Arabic</option>
+        </select>
+    </div>
+
+    <!-- Recent Pages -->
+    <div id="recentPages" style="position:fixed;bottom:24px;left:24px;z-index:100;background:#fff7;border-radius:8px;padding:8px 16px;font-size:0.97rem;color:#2563eb;box-shadow:0 2px 8px #2563eb22;"></div>
+
+    <!-- Floating Help Button -->
+    <div class="help-fab" title="Live Chat" id="helpFab" tabindex="0" aria-label="Open Live Chat">
+        <i class='bx bx-message-dots bx-tada'></i>
+    </div>
+
+    <!-- Live Chat Modal (Feature: Professional Live Chat UI) -->
+    <div id="chatModal" style="display:none;position:fixed;bottom:90px;right:30px;z-index:1000;width:340px;max-width:95vw;">
+        <div class="bg-white rounded-xl shadow-2xl border border-blue-200 flex flex-col" style="overflow:hidden;">
+            <div class="flex items-center justify-between bg-blue-700 text-white px-4 py-3">
+                <span class="font-semibold"><i class='bx bx-message-dots mr-2'></i>Live Chat Support</span>
+                <button onclick="closeChat()" aria-label="Close Chat" class="text-white text-xl hover:text-blue-200" style="background:none;border:none;">&times;</button>
+            </div>
+            <div id="chatMessages" style="height:220px;overflow-y:auto;padding:14px;background:#f8fafc;font-size:1rem;">
+                <div class="mb-2 text-gray-600" id="chatWelcome">👋 Hi! How can we help you today?</div>
+            </div>
+            <form id="chatForm" class="flex border-t border-blue-100">
+                <input id="chatInput" type="text" placeholder="Type your message..." autocomplete="off" class="flex-1 px-3 py-2 outline-none" style="border:none;">
+                <button type="submit" class="px-4 text-blue-700 font-bold hover:text-blue-900 transition" style="background:none;border:none;"><i class='bx bx-send'></i></button>
+                <!-- File Upload -->
+                <input type="file" id="chatFile" style="display:none;" accept="image/*,.pdf,.doc,.docx">
+                <label for="chatFile" title="Attach file" style="cursor:pointer;margin-left:8px;"><i class='bx bx-paperclip'></i></label>
+            </form>
+            <!-- FAQ Suggestions -->
+            <ul id="faqSuggestions" style="display:none;max-height:90px;overflow-y:auto;background:#f1f5f9;border-radius:6px;margin:8px 0 0 0;padding:6px 12px;font-size:0.98rem;color:#2563eb;"></ul>
+            <!-- Rate Helpfulness -->
+            <div id="chatRating" style="text-align:center;padding:10px 0;">
+                <span style="font-size:1.1rem;">Was this helpful?</span>
+                <button onclick="rateChat(1)" style="background:none;border:none;color:#2ecc40;font-size:1.5rem;cursor:pointer;">👍</button>
+                <button onclick="rateChat(0)" style="background:none;border:none;color:#FF6B6B;font-size:1.5rem;cursor:pointer;">👎</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ARIA Live for Screen Readers -->
+    <div id="ariaLive" aria-live="polite" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;"></div>
+
+    <!-- Back to Home Button (Feature: Prominent Home Navigation) -->
+    <div style="position:fixed;top:24px;right:24px;z-index:100;">
+        <a href="index.hospital.html" class="bg-blue-700 hover:bg-blue-900 text-white px-5 py-2 rounded-full font-semibold shadow transition flex items-center gap-2" style="text-decoration:none;">
+            <i class='bx bx-arrow-back'></i> Home
+        </a>
+    </div>
+
+    <!-- Accessibility Tools (Feature: Font Size & Contrast) -->
+    <div style="position:fixed;top:24px;left:24px;z-index:100;display:flex;gap:8px;">
+        <button onclick="changeFontSize(1)" title="Increase Font Size" class="bg-blue-700 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg hover:bg-blue-900 transition"><i class='bx bx-plus'></i></button>
+        <button onclick="changeFontSize(-1)" title="Decrease Font Size" class="bg-blue-700 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg hover:bg-blue-900 transition"><i class='bx bx-minus'></i></button>
+        <button onclick="toggleContrast()" title="Toggle High Contrast" class="bg-blue-700 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg hover:bg-blue-900 transition"><i class='bx bx-adjust'></i></button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-blue-800 text-white py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 MedBook Hospital System. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+        // Animate fade-in sections on scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const fadeEls = document.querySelectorAll('.fade-in');
+            fadeEls.forEach((el, i) => {
+                setTimeout(() => el.style.opacity = 1, 200 + i * 150);
+            });
+        });
+
+        // Live Chat Modal Logic
+        const helpFab = document.getElementById('helpFab');
+        const chatModal = document.getElementById('chatModal');
+        helpFab.onclick = () => chatModal.style.display = 'block';
+        helpFab.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') chatModal.style.display = 'block'; };
+        function closeChat() { chatModal.style.display = 'none'; }
+
+        // Chatbot FAQ Suggestions
+        const faqList = [
+            { q: "reset password", a: "Go to your profile, click 'Change Password', and follow the instructions." },
+            { q: "patient records", a: "Click on 'Patient Records' in the main navigation menu." },
+            { q: "contact support", a: "Use the 'Contact' page or the chat widget at the bottom right." }
+        ];
+        const chatInput = document.getElementById('chatInput');
+        const faqSuggestions = document.getElementById('faqSuggestions');
+        chatInput.addEventListener('input', function() {
+            const val = this.value.toLowerCase();
+            if (val.length < 3) { faqSuggestions.style.display = 'none'; return; }
+            const matches = faqList.filter(f => f.q.includes(val));
+            if (matches.length) {
+                faqSuggestions.innerHTML = matches.map(f => `<li style="cursor:pointer;padding:3px 0;" onclick="selectFaq('${f.a.replace(/'/g,"\\'")}')">${f.a}</li>`).join('');
+                faqSuggestions.style.display = '';
+            } else {
+                faqSuggestions.style.display = 'none';
+            }
+        });
+        function selectFaq(answer) {
+            document.getElementById('chatMessages').innerHTML += `<div class="mb-2 text-gray-600"><b>Support:</b> ${answer}</div>`;
+            faqSuggestions.style.display = 'none';
+            announce("Support replied: " + answer);
+            saveChatHistory();
+        }
+
+        // File Upload in Chat
+        document.getElementById('chatFile').addEventListener('change', function() {
+            if (this.files.length) {
+                const file = this.files[0];
+                document.getElementById('chatMessages').innerHTML += `<div class="mb-2 text-blue-700 text-right"><b>You:</b> <i class='bx bx-paperclip'></i> ${file.name}</div>`;
+                document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+                announce("You uploaded a file: " + file.name);
+                saveChatHistory();
+            }
+        });
+
+        // Chat History (localStorage)
+        function saveChatHistory() {
+            localStorage.setItem('medbook_chat_history', document.getElementById('chatMessages').innerHTML);
+        }
+        function loadChatHistory() {
+            const history = localStorage.getItem('medbook_chat_history');
+            if (history) document.getElementById('chatMessages').innerHTML = history;
+        }
+        document.getElementById('chatForm').addEventListener('submit', saveChatHistory);
+        window.addEventListener('DOMContentLoaded', loadChatHistory);
+
+        // Rate Helpfulness
+        function rateChat(val) {
+            document.getElementById('chatRating').innerHTML = val ? "Thank you for your feedback! 😊" : "Sorry! We'll try to do better. 😔";
+        }
+
+        // Multi-language Support for Help
+        const helpTexts = {
+            en: { help: "How can we help you today?" },
+            ku: { help: "چۆن دەتوانین یارمەتیت بدەین؟" },
+            ar: { help: "كيف يمكننا مساعدتك اليوم؟" }
+        };
+        document.getElementById('helpLang').onchange = function() {
+            document.getElementById('chatWelcome').textContent = helpTexts[this.value].help;
+        };
+
+        // Screen Reader Announcements
+        function announce(msg) {
+            document.getElementById('ariaLive').textContent = msg;
+        }
+
+        // Recent Pages
+        const page = window.location.pathname;
+        let recent = JSON.parse(localStorage.getItem('medbook_recent_pages') || "[]");
+        if (!recent.includes(page)) {
+            recent.unshift(page);
+            if (recent.length > 5) recent = recent.slice(0,5);
+            localStorage.setItem('medbook_recent_pages', JSON.stringify(recent));
+        }
+        function showRecentPages() {
+            const container = document.getElementById('recentPages');
+            if (!container) return;
+            const links = recent.map(p => `<a href="${p}" class="text-blue-700 underline mr-2">${p.replace('index.','').replace('.html','')}</a>`).join('');
+            container.innerHTML = `<div class="text-gray-600 text-sm">Recent pages: ${links}</div>`;
+        }
+        showRecentPages();
+
+        // Chat Form Submit (with ARIA and FAQ/History/Rating)
+        document.getElementById('chatForm').onsubmit = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML += `<div class="mb-2 text-blue-700 text-right"><b>You:</b> ${msg}</div>`;
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            announce("You said: " + msg);
+            saveChatHistory();
+            setTimeout(() => {
+                chatMessages.innerHTML += `<div class="mb-2 text-gray-600"><b>Support:</b> We'll get back to you soon! (Demo)</div>`;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                announce("Support replied: We'll get back to you soon!");
+                saveChatHistory();
+            }, 800);
+        };
+
+        // Accessibility: High Contrast & Font Size
+        let highContrast = false;
+        function toggleContrast() {
+            highContrast = !highContrast;
+            document.body.style.background = highContrast ? "#000" : "";
+            document.body.style.color = highContrast ? "#fff" : "";
+            document.querySelectorAll('.bg-white').forEach(el => el.style.background = highContrast ? "#232a36" : "#fff");
+            document.querySelectorAll('.text-blue-700').forEach(el => el.style.color = highContrast ? "#FFD700" : "#2563eb");
+        }
+        let fontSize = 16;
+        function changeFontSize(delta) {
+            fontSize += delta;
+            if (fontSize < 12) fontSize = 12;
+            if (fontSize > 24) fontSize = 24;
+            document.body.style.fontSize = fontSize + "px";
+        }
+    </script>
+</body>
+</html>
